@@ -1,4 +1,32 @@
-# Pharmacy retail sales warehouse
+# Pharmacy sales and dispensing data
+
+## English NHS dispensing warehouse
+
+The verified January–June 2024 build contains **107,473,886** records. See the [source manifest](dispensing-manifest.json) for counts and SHA-256 checksums.
+
+Build a single DuckDB table, `dispensing`, from complete monthly English Prescribing Dataset extracts. The importer starts in January 2024 and stops after the first complete month that brings the total to at least 100 million source observations. Each row preserves a publisher observation of dispensing activity. Multiple items can contribute to one row. Actual costs and net ingredient costs are reported in GBP. U.S. retail revenue is maintained separately below.
+
+Install into a private virtual environment with Python 3.12 and allow several gigabytes for the database, compressed downloads and one expanded CSV. Use a private local data directory on an encrypted volume. Only the build identity needs write access. Distribute a read-only snapshot to analysts after the writer closes.
+
+```sh
+python -m pip install duckdb==1.4.4
+python build_dispensing.py dispensing.duckdb --cache epd-cache
+```
+
+The build checks each expanded CSV against the NHSBSA catalogue SHA-256, projects ten fields and appends the month in one transaction. A completed month is skipped on rerun. Use a new database and cache to ingest a revised release. Connect to the result with DuckDB. For example:
+
+```sql
+SELECT year_month, count(*) AS source_records,
+       sum(items) AS prescription_items, sum(actual_cost_gbp) AS reported_cost_gbp
+FROM dispensing
+GROUP BY year_month ORDER BY year_month;
+```
+
+Join `dispensing` to `releases` using `year_month` to retrieve each row's source and checksum. The release table enforces one row per month. The import excludes practice street addresses. Control host access, test restores, and keep the database, its write-ahead log and source cache outside Git.
+
+Contains public sector information licensed under the [Open Government Licence v3.0](https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/). Source: [NHS Business Services Authority, English Prescribing Dataset](https://opendata.nhsbsa.net/dataset/english-prescribing-data-epd). Consult the publisher's caveats for coverage and changes to cost calculations.
+
+## U.S. pharmacy retail sales warehouse
 
 A single-host SQLite warehouse for aggregate U.S. pharmacy and drug-store retail sales. Each observation represents one calendar month and one adjustment basis, in millions of U.S. dollars. Store revenue includes merchandise other than prescriptions. Select one series per analysis. Adding both series double-counts sales.
 
