@@ -1,5 +1,7 @@
 # Pharmacy sales and dispensing data
 
+**Historical edition · January–June 2024 · 107,473,886 dispensing records.** See the [operations guide](OPERATIONS.md) for release monitoring, access review and rollback.
+
 ## Download the public database
 
 Get both `dispensing.part-00` and `dispensing.part-01`, plus `SHA256SUMS`, from the [latest published snapshot](https://github.com/Ashik-Mohammed-S/sales.dbo/releases/latest). From their download directory, reconstruct the database and verify the digest before opening it.
