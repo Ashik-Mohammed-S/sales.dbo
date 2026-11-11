@@ -1,0 +1,43 @@
+{
+  "dataset": "NHSBSA English Prescribing Dataset",
+  "table": "dispensing",
+  "rows": 107473886,
+  "releases": [
+    {
+      "year_month": 202401,
+      "rows": 18080573,
+      "csv_sha256": "188fa5c53b9a94957f16216e91023ee25471ae5e1a36188b03e9f2ef647c5834",
+      "source_url": "https://opendata.nhsbsa.net/dataset/65050ec0-5abd-48ce-989d-defc08ed837e/resource/fe7c75f9-7ac6-4d03-8941-74f596db4a5a/download/epd_202401.csv"
+    },
+    {
+      "year_month": 202402,
+      "rows": 17651709,
+      "csv_sha256": "10a15a74bdd748a2a92c4beb25f57bb6e8ac47f9b9382df6576a04eae553f622",
+      "source_url": "https://opendata.nhsbsa.net/dataset/65050ec0-5abd-48ce-989d-defc08ed837e/resource/44326448-3649-4a90-b849-21e1aa40480e/download/epd_202402.csv"
+    },
+    {
+      "year_month": 202403,
+      "rows": 17779549,
+      "csv_sha256": "18878ee8056d5e51e5c6371801ccac8afe0615e353c4373be0958c3ac23bbcd3",
+      "source_url": "https://opendata.nhsbsa.net/dataset/65050ec0-5abd-48ce-989d-defc08ed837e/resource/d047e02f-1440-45b9-9bd8-94cba6452c01/download/epd_202403.csv"
+    },
+    {
+      "year_month": 202404,
+      "rows": 18042595,
+      "csv_sha256": "0be982c388bfbbaca7130d7f109c9d8e360a03bd9f574944be417916b4d2e986",
+      "source_url": "https://opendata.nhsbsa.net/dataset/65050ec0-5abd-48ce-989d-defc08ed837e/resource/6069055c-0804-4bc1-b11b-1a178c9b9355/download/epd_202404.csv"
+    },
+    {
+      "year_month": 202405,
+      "rows": 18143434,
+      "csv_sha256": "b12461bab81ef8ef749384eb5349e6aec654dacd76ce1eeb4cf72c6cfc153725",
+      "source_url": "https://opendata.nhsbsa.net/dataset/65050ec0-5abd-48ce-989d-defc08ed837e/resource/e96f3586-8bd1-48ed-8339-eb2cac120edd/download/epd_202405.csv"
+    },
+    {
+      "year_month": 202406,
+      "rows": 17776026,
+      "csv_sha256": "2db7c1ba38da65d685511bab8fa7ba6b559ebfe9c970566d42e8eb1bb4c21e74",
+      "source_url": "https://opendata.nhsbsa.net/dataset/65050ec0-5abd-48ce-989d-defc08ed837e/resource/1e8042eb-0c72-4df6-b067-33fbfad2173e/download/epd_202406.csv"
+    }
+  ]
+}
