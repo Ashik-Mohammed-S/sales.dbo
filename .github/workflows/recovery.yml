@@ -1,0 +1,29 @@
+name: Public release recovery
+on:
+  schedule:
+    - cron: '17 6 * * 1'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Optional version tag to rehearse rollback
+        required: false
+  push:
+    paths:
+      - '.github/workflows/recovery.yml'
+      - 'ops/recover.sh'
+      - 'verify_snapshot.py'
+permissions:
+  contents: read
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: python -m pip install duckdb==1.4.4
+      - name: Recover from public downloads without credentials
+        env:
+          TAG: ${{ inputs.tag }}
+        run: bash ops/recover.sh "$TAG"
