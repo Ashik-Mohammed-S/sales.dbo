@@ -3,7 +3,6 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - '.github/workflows/publish-database.yml'
       - 'dispensing-manifest.json'
       - 'build_dispensing.py'
 permissions:
@@ -12,12 +11,12 @@ concurrency:
   group: publish-database
   cancel-in-progress: false
 jobs:
-  publish:
+  build:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 180
     permissions:
-      contents: write
+      contents: read
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
@@ -28,23 +27,36 @@ jobs:
           python3 -m venv /tmp/db-env
           /tmp/db-env/bin/pip install duckdb==1.4.4
           /tmp/db-env/bin/python build_dispensing.py dispensing.duckdb
-          /tmp/db-env/bin/python - <<'PY'
-          import json
-          import duckdb
-          from pathlib import Path
-          manifest = json.loads(Path("dispensing-manifest.json").read_text())
-          with duckdb.connect("dispensing.duckdb", read_only=True) as db:
-              actual = db.execute("""SELECT year_month, count(*), csv_sha256
-                  FROM dispensing JOIN releases USING (year_month)
-                  GROUP BY ALL ORDER BY year_month""").fetchall()
-              expected = [(r["year_month"], r["rows"], r["csv_sha256"]) for r in manifest["releases"]]
-              if actual != expected or db.execute("SELECT count(*) FROM dispensing").fetchone()[0] != manifest["rows"]:
-                  raise ValueError("Database differs from verified manifest")
-          PY
+          /tmp/db-env/bin/python verify_snapshot.py dispensing.duckdb
           split -b 1700M -d dispensing.duckdb dispensing.part-
           sha256sum dispensing.part-* dispensing.duckdb > SHA256SUMS
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: verified-snapshot
+          retention-days: 1
+          compression-level: 0
+          path: |
+            dispensing.part-*
+            SHA256SUMS
+            dispensing-manifest.json
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: verified-snapshot
+      - name: Verify transfer before publishing
+        run: |
+          set -euo pipefail
+          cat dispensing.part-00 dispensing.part-01 > dispensing.duckdb
+          sha256sum dispensing.part-00 dispensing.part-01 dispensing.duckdb > computed
+          diff -u SHA256SUMS computed
       - name: Publish verified release
         env:
+          GH_REPO: ${{ github.repository }}
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
