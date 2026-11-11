@@ -1,0 +1,39 @@
+name: Restore previous latest release
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing verified dispensing release to designate latest
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: publish-database
+  cancel-in-progress: false
+jobs:
+  verify:
+    if: github.actor == github.repository_owner && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: python -m pip install duckdb==1.4.4
+      - env:
+          TAG: ${{ inputs.tag }}
+        run: bash ops/recover.sh "$TAG"
+  promote:
+    needs: verify
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          TAG: ${{ inputs.tag }}
+          GH_REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release edit "$TAG" --latest
+          test "$(gh api "repos/$GH_REPO/releases/latest" --jq .tag_name)" = "$TAG"
